@@ -1,13 +1,13 @@
 # UART Transceiver in VHDL
 
 A UART transmitter and receiver written in VHDL, simulated and verified in ModelSim.
-Built as a portfolio project while preparing for a role in defence electronics.
+Built as a portfolio project while preparing for a role in defense electronics.
 
 ---
 
 ## What it does
 
-Sends and receives serial data in the standard 8N1 UART format — 8 data bits, no parity, 1 stop bit.
+Sends and receives serial data in the standard 8N1 UART format - 8 data bits, no parity, 1 stop bit.
 You give it a byte, it sends it down a wire one bit at a time at 115200 baud, and the receiver on the other end rebuilds the original byte.
 
 ---
@@ -16,14 +16,12 @@ You give it a byte, it sends it down a wire one bit at a time at 115200 baud, an
 
 ```
 rtl/
-    baud_gen.vhd   — generates timing pulses for TX and RX
-    uart_tx.vhd    — transmitter state machine
-    uart_rx.vhd    — receiver state machine
-    uart_top.vhd   — connects everything together
+    baud_gen.vhd   - generates timing pulses for TX and RX
+    uart_tx.vhd    - transmitter state machine
+    uart_rx.vhd    - receiver state machine
+    uart_top.vhd   - connects everything together
 tb/
-    uart_tb.vhd    — self-checking testbench
-sim/
-    sim.do         — ModelSim run script
+    uart_tb.vhd    - self-checking testbench
 ```
 
 ---
@@ -34,7 +32,7 @@ The FPGA runs at 100 MHz. At 115200 baud each bit lasts 868 clock cycles.
 
 Rather than creating a separate baud clock, the baud generator produces a single-cycle pulse every 868 cycles. The TX and RX run on the main clock and only advance their state when that pulse fires. This keeps everything in one clock domain.
 
-The RX also gets a faster pulse — 16 times per bit period — so it can sample each incoming bit at its centre rather than near the edges where the signal is least stable.
+The RX also gets a faster pulse - 16 times per bit period - so it can sample each incoming bit at its center rather than near the edges where the signal is least stable.
 
 ---
 
@@ -56,13 +54,28 @@ The testbench connects TX directly back to RX (loopback) and sends four bytes, c
 
 ## Running it yourself
 
-Open ModelSim, navigate to the project folder, and type:
+Open ModelSim, navigate to the project folder, and paste these commands into the transcript window:
 
 ```tcl
-do sim/sim.do
+vcom -2008 rtl/baud_gen.vhd
+vcom -2008 rtl/uart_tx.vhd
+vcom -2008 rtl/uart_rx.vhd
+vcom -2008 rtl/uart_top.vhd
+vcom -2008 tb/uart_tb.vhd
+vsim work.uart_tb
+add wave /uart_tb/clk
+add wave /uart_tb/rst
+add wave /uart_tb/tx_data
+add wave /uart_tb/tx_valid
+add wave /uart_tb/tx_ready
+add wave /uart_tb/serial_loop
+add wave /uart_tb/rx_data
+add wave /uart_tb/rx_valid
+add wave /uart_tb/frame_err
+add wave /uart_tb/dut/tx/state
+add wave /uart_tb/dut/rx/state
+run -all
 ```
-
-That compiles everything, loads the testbench, adds the signals to the wave window, and runs the simulation.
 
 ---
 
@@ -70,5 +83,6 @@ That compiles everything, loads the testbench, adds the signals to the wave wind
 
 - ModelSim Intel FPGA Edition 2020.1
 - VHDL-2008
+- Visual Studio Code
 
 
